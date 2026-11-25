@@ -5,7 +5,7 @@ import {
   type DocumentFilters,
   type UpdateDocumentMetadataRequest,
 } from '@/api/documents.api';
-import type { ApiError } from '@/types/api';
+import type { ApiError, UploadResult } from '@/types/api';
 
 export const DOCUMENTS_KEYS = {
   all: ['documents'] as const,
@@ -38,21 +38,34 @@ export function useDocumentsListQuery(filters: DocumentFilters) {
   });
 }
 
+function reportUploadResults(results: UploadResult[]) {
+  const accepted = results.filter((r) => r.accepted);
+  if (accepted.length === 1) {
+    toast.success(`Documento "${accepted[0].filename}" enviado a procesamiento.`);
+  } else if (accepted.length > 1) {
+    toast.success(`${accepted.length} documentos enviados a procesamiento.`);
+  }
+  results
+    .filter((r) => !r.accepted)
+    .forEach((r) => toast.error(`"${r.filename}" rechazado: ${r.error ?? 'archivo no válido.'}`));
+}
+
 export function useUploadDocumentsMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (files: File[]) => documentsApi.uploadDocuments(files),
-    onSuccess: (uploaded) => {
-      toast.success(
-        uploaded.length === 1
-          ? `Documento "${uploaded[0].name}" enviado a procesamiento.`
-          : `${uploaded.length} documentos enviados a procesamiento.`
-      );
+    onSuccess: (results) => {
+      reportUploadResults(results);
       queryClient.invalidateQueries({ queryKey: DOCUMENTS_KEYS.all });
     },
-    onError: (error: ApiError) => {
-      toast.error(error.message || 'Error al subir los documentos.');
+    // Si se rechazan todos, el backend responde 400 con la misma lista de resultados.
+    onError: (error: ApiError | UploadResult[]) => {
+      if (Array.isArray(error)) {
+        reportUploadResults(error);
+      } else {
+        toast.error(error.message || 'Error al subir los documentos.');
+      }
     },
   });
 }
