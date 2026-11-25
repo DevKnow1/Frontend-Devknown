@@ -64,12 +64,17 @@ export function RegisterPage() {
   const onSubmit = async (values: RegisterFormValues) => {
     setServerError(null);
     try {
-      const response = await authApi.register({
+      await authApi.register({
         fullName: values.fullName,
         email: values.email,
         password: values.password,
       });
-      setSession(response.accessToken, response.user);
+      // El registro devuelve solo el usuario (sin token): se inicia sesión a continuación.
+      const session = await authApi.login({
+        email: values.email,
+        password: values.password,
+      });
+      setSession(session.accessToken, session.user);
       navigate('/chat', { replace: true });
     } catch (err) {
       const apiError = err as ApiError;
