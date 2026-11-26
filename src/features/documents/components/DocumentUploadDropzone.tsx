@@ -63,10 +63,10 @@ export function DocumentUploadDropzone() {
     setSelectedFiles((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (selectedFiles.length === 0) return;
-    await uploadMutation.mutateAsync(selectedFiles);
-    setSelectedFiles([]);
+    // Los avisos (éxito y rechazos) los emite el hook; aquí solo se limpia la selección si hubo éxito.
+    uploadMutation.mutate(selectedFiles, { onSuccess: () => setSelectedFiles([]) });
   };
 
   return (

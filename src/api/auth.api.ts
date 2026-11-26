@@ -8,8 +8,8 @@ import type {
 
 export const authApi = {
   // HU-10 (RF-01): Registro público
-  register: async (payload: RegisterRequest): Promise<AuthResponse> => {
-    const { data } = await apiClient.post<AuthResponse>('/auth/register', payload);
+  register: async (payload: RegisterRequest): Promise<User> => {
+    const { data } = await apiClient.post<User>('/auth/register', payload);
     return data;
   },
 
