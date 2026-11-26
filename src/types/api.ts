@@ -79,6 +79,14 @@ export interface DocumentItem {
   updatedAt?: string;
 }
 
+// POST /api/documents: un resultado por archivo (201 si se aceptó alguno, 400 si ninguno)
+export interface UploadResult {
+  filename: string;
+  accepted: boolean;
+  error: string | null;
+  document: DocumentItem | null;
+}
+
 export interface DocumentStats {
   total: number;
   available: number;
