@@ -3,6 +3,7 @@ import type {
   DocumentItem,
   DocumentStats,
   PageResponse,
+  UploadResult,
 } from '../types/api';
 
 export interface DocumentFilters {
@@ -27,13 +28,13 @@ export const documentsApi = {
   },
 
   // HU-14, HU-15, HU-20 (RF-06, RF-07, RF-12): Carga múltiple multipart
-  uploadDocuments: async (files: File[]): Promise<DocumentItem[]> => {
+  uploadDocuments: async (files: File[]): Promise<UploadResult[]> => {
     const formData = new FormData();
     files.forEach((file) => {
       formData.append('files', file);
     });
 
-    const { data } = await apiClient.post<DocumentItem[]>('/documents', formData, {
+    const { data } = await apiClient.post<UploadResult[]>('/documents', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
